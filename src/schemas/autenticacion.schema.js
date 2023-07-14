@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+// Esquema para el registro de usuarios
 export const registroSchema = z.object({
     nombres: z.string({
         required_error: 'Los nombres son requeridos'
@@ -39,6 +40,7 @@ export const registroSchema = z.object({
     })
 });
 
+// Esquema para la autenticación de usuarios
 export const autenticacionSchema = z.object({
     correo: z.string({
         required_error: 'El correo es requerido'

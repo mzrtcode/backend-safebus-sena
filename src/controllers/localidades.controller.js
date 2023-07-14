@@ -1,5 +1,6 @@
 import { pool } from "../db.js";
 
+// Función que maneja la solicitud para obtener todas las localidades
 export const obtenerLocalidades = async (req, res) => {
     try {
         const [resultado] = await pool.query('SELECT * FROM localidades');
@@ -10,6 +11,7 @@ export const obtenerLocalidades = async (req, res) => {
     }
 }
 
+// Función que maneja la solicitud para obtener una localidad por su ID
 export const obtenerLocalidad = async (req, res) => {
     try {
         const { id } = req.params;
@@ -21,6 +23,7 @@ export const obtenerLocalidad = async (req, res) => {
     }
 }
 
+//Función que maneja la solicitud para crear una nueva localidad.
 export const crearLocalidad = async (req, res) => {
     try {
         const { nombre, acronimo } = req.body;
@@ -39,7 +42,7 @@ export const crearLocalidad = async (req, res) => {
     }
 }
 
-
+// Función que maneja la solicitud para actualizar una localidad existente.
 export const actualizarLocalidad = async (req, res) => {
     try {
         const { id } = req.params;
@@ -52,6 +55,7 @@ export const actualizarLocalidad = async (req, res) => {
     }
 }
 
+// Función que maneja la solicitud para eliminar una localidad existente.
 export const eliminarLocalidad = async (req, res) => {
     try {
         const {id} = req.params;
