@@ -3,7 +3,7 @@ import { pool } from "../db.js";
 export const obtenerLocalidades = async (req, res) => {
     try {
         const [resultado] = await pool.query('SELECT * FROM localidades');
-        res.status(200).json(resultado);
+        res.status(200).json({ data: resultado });
     } catch (error) {
         console.log(error);
         res.status(500).json({ mensaje: "Error al obtener las localidades" });
@@ -14,7 +14,7 @@ export const obtenerLocalidad = async (req, res) => {
     try {
         const { id } = req.params;
         const [resultado] = await pool.query('SELECT * FROM localidades WHERE id_localidad = ?', [id]);
-        res.status(200).json(resultado);
+        res.status(200).json({ data: resultado });
     } catch (error) {
         console.log(error);
         res.status(500).json({ mensaje: "Error al obtener la localidad" });
@@ -38,6 +38,7 @@ export const crearLocalidad = async (req, res) => {
         res.status(500).json({ mensaje: "Error al crear la localidad" });
     }
 }
+
 
 export const actualizarLocalidad = async (req, res) => {
     try {
