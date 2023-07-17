@@ -9,27 +9,29 @@ export const iniciarSesion = async (req, res) => {
   const { correo, clave } = req.body
 
   // Verificar en la tabla "administradores"
-  const resultadoAdministradores = await verificarCredenciales('administradores', correo, clave)
-  if (resultadoAdministradores) {
+  const { success, datos } = await verificarCredenciales('administradores', correo, clave)
+  if (success && datos) {
     const respuesta = {
-      correo,
-      clave,
-      rol: 'administrador'
+      nombres: datos.nombres,
+      apellidos: datos.apellidos,
+      correo: datos.correo,
+      rol: datos.rol
     }
-    const token = crearTokenAcceso(respuesta)
+    const token = await crearTokenAcceso(respuesta)
     res.cookie('token', token)
     return res.send(respuesta)
   }
 
   // Verificar en la tabla "vendedores"
-  const resultadoVendedores = await verificarCredenciales('vendedores', correo, clave)
-  if (resultadoVendedores) {
+  const { success: vendedorSuccess, datos: vendedorDatos } = await verificarCredenciales('vendedores', correo, clave)
+  if (vendedorSuccess && vendedorDatos) {
     const respuesta = {
-      correo,
-      clave,
-      rol: 'vendedor'
+      nombres: vendedorDatos.nombres,
+      apellidos: vendedorDatos.apellidos,
+      correo: vendedorDatos.correo,
+      rol: vendedorDatos.rol
     }
-    const token = crearTokenAcceso(respuesta)
+    const token = await crearTokenAcceso(respuesta)
     res.cookie('token', token)
     return res.send(respuesta)
   }
@@ -45,38 +47,81 @@ async function verificarCredenciales (tabla, correo, clave) {
 
     if (resultado.length > 0) {
       const usuario = resultado[0]
+      const datos = {
+        nombres: resultado.nombres,
+        apellidos: resultado.apellidos,
+        correo: usuario.correo,
+        rol: tabla === 'administradores' ? 'administrador' : 'vendedor'
+      }
+
       // Comparar la contraseña cifrada con la contraseña proporcionada
       const esClaveCorrecta = await bcrypt.compare(clave, usuario.clave)
 
-      return esClaveCorrecta // Devuelve true si la contraseña es correcta, o false en caso contrario
+      if (esClaveCorrecta) {
+        return { success: true, datos } // Devuelve un objeto con la propiedad "success" y los datos del usuario
+      } else {
+        return { success: false, datos } // Devuelve un objeto con la propiedad "success" y los datos del usuario
+      }
     }
 
-    return false // Si no se encontró el usuario, retorna false
+    return { success: false } // Si no se encontró el usuario, retorna un objeto con la propiedad "success" en false
   } catch (error) {
     console.error('Error al verificar las credenciales:', error)
-    return false
+    return { success: false, error } // Devuelve un objeto con la propiedad "success" en false y el error
   }
 }
 
 // Función que maneja la solicitud para obtener el perfil del usuario:
 export const obtenerPerfil = async (req, res) => {
-  // TO DO: Obtener el perfil del usuario
+  const { correo } = req.usuario
+
+  try {
+    let usuarioEncontrado
+
+    // Verificar en la tabla "administradores"
+    const [administradorEncontrado] = await pool.query('SELECT * FROM administradores WHERE correo = ?', [correo])
+    if (administradorEncontrado.length > 0) {
+      usuarioEncontrado = administradorEncontrado[0]
+      usuarioEncontrado.rol = 'administrador'
+    }
+
+    // Si no se encontró en "administradores", verificar en la tabla "vendedores"
+    if (!usuarioEncontrado) {
+      const [vendedorEncontrado] = await pool.query('SELECT * FROM vendedores WHERE correo = ?', [correo])
+      if (vendedorEncontrado.length > 0) {
+        usuarioEncontrado = vendedorEncontrado[0]
+        usuarioEncontrado.rol = 'vendedor'
+      }
+    }
+
+    if (usuarioEncontrado) {
+      console.log(usuarioEncontrado, correo)
+      return res.json({
+        nombres: usuarioEncontrado.nombres,
+        apellidos: usuarioEncontrado.apellidos,
+        correo: usuarioEncontrado.correo,
+        rol: usuarioEncontrado.rol
+      })
+    }
+
+    return res.status(404).json({ message: 'Usuario no encontrado' })
+  } catch (error) {
+    console.error('Error al obtener el perfil:', error)
+    return res.status(500).json({ message: 'Error en el servidor' })
+  }
 }
 
 // Función que maneja la solicitud para verificar si el usuario tiene una sesión activa:
 export const verificarSesion = async (req, res) => {
   const { token } = req.cookies
 
-  if (!token) return res.status(401).json({ message: 'Sin token' })
+  if (!token) {
+    return res.status(401).json({ message: 'Sin token' })
+  }
+
   jwt.verify(token, TOKEN_SECRETO, async (err, decoded) => {
     if (err) return res.status(401).json({ message: 'Token invalido' })
-    const userFound = await User.findById(decoded.id)
-    if (!userFound) return res.status(400).json({ message: 'Usuario no encontrado' })
-    return res.json({
-      id: userFound._id,
-      username: userFound.username,
-      email: userFound.email
-    })
+    return res.json(decoded)
   })
 }
 
@@ -91,31 +136,42 @@ export const registrarUsuario = async (req, res) => {
     celular,
     fecha_nacimiento,
     direccion,
-    clave
+    clave,
+    rol
   } = req.body
 
-  console.log({
-    nombres,
-    apellidos,
-    tipo_identificacion,
-    numero_identificacion,
-    correo,
-    celular,
-    fecha_nacimiento,
-    direccion,
-    clave
-  })
-  res.send({
-    nombres,
-    apellidos,
-    tipo_identificacion,
-    numero_identificacion,
-    correo,
-    celular,
-    fecha_nacimiento,
-    direccion,
-    clave
-  })
+  let tabla
+
+  if (rol === 'administrador') {
+    tabla = 'administradores'
+  } else if (rol === 'vendedor') {
+    tabla = 'vendedores'
+  } else {
+    return res.status(400).json({ message: 'Rol inválido' })
+  }
+
+  const claveCifrada = await bcrypt.hash(clave, 10)
+
+  try {
+    // Verificar si el correo electrónico ya está registrado
+    const existeUsuario = await pool.query(`SELECT * FROM ${tabla} WHERE correo = ?`, [correo])
+
+    if (existeUsuario.length > 0) {
+      return res.status(400).json({ message: 'El correo electrónico ya está registrado' })
+    }
+
+    // Insertar el nuevo usuario
+    const resultado = await pool.query(`INSERT INTO ${tabla} (nombres, apellidos, tipo_identificacion, numero_identificacion, correo, celular, fecha_nacimiento, direccion, clave) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, [nombres, apellidos, tipo_identificacion, numero_identificacion, correo, celular, fecha_nacimiento, direccion, claveCifrada])
+
+    if (resultado.affectedRows > 0) {
+      return res.status(201).json({ message: 'Usuario creado' })
+    } else {
+      return res.status(500).json({ message: 'No se pudo crear el usuario' })
+    }
+  } catch (error) {
+    console.error('Error al registrar el usuario:', error)
+    return res.status(500).json({ message: 'Error al registrar el usuario' })
+  }
 }
 
 // Función que maneja la solicitud de cerrar la sesión de un usuario:
