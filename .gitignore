@@ -133,3 +133,7 @@ dist
 .DS_Store 
 *.ini 
 *.ini 
+
+# Certificate and key for HTTPS
+*.key
+*.crt

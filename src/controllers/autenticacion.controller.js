@@ -19,6 +19,7 @@ export const iniciarSesion = async (req, res) => {
     }
     const token = await crearTokenAcceso(respuesta)
     res.cookie('token', token)
+    console.log(token)
     return res.send(respuesta)
   }
 
@@ -33,6 +34,8 @@ export const iniciarSesion = async (req, res) => {
     }
     const token = await crearTokenAcceso(respuesta)
     res.cookie('token', token)
+    console.log(token)
+
     return res.send(respuesta)
   }
 
@@ -48,8 +51,8 @@ async function verificarCredenciales (tabla, correo, clave) {
     if (resultado.length > 0) {
       const usuario = resultado[0]
       const datos = {
-        nombres: resultado.nombres,
-        apellidos: resultado.apellidos,
+        nombres: resultado[0].nombres,
+        apellidos: resultado[0].apellidos,
         correo: usuario.correo,
         rol: tabla === 'administradores' ? 'administrador' : 'vendedor'
       }
