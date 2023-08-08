@@ -1,16 +1,17 @@
-import { createPool } from 'mysql2/promise';
+import { createPool } from 'mysql2/promise'
 
-export let pool;
+export const pool = createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME
+})
 
-try {
-    pool = new createPool({
-        host: process.env.DB_HOST,
-        user: process.env.DB_USER,
-        password: process.env.DB_PASS,
-        database: process.env.DB_NAME,
-    })
-    console.log(':: Conectado a la base de datos ::');
-
-} catch (error) {
-    console.error('Error al conectarse a la base de datos:', error);
-}
+pool.getConnection()
+  .then(connection => {
+    console.log(':: Conectado a la base de datos ::')
+    connection.release()
+  })
+  .catch(err => {
+    console.error('Error al conectarse a la base de datos:', err)
+  })

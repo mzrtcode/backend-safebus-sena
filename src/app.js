@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser'
 import './config.js' // Se importa un archivo de configuración (contiene variables de entorno)
 import autenticacionRoutes from './routes/autenticacion.routes.js'
 import localidadesRouter from './routes/localidades.routes.js'
+import rutasRouter from './routes/rutas.routes.js'
 /* import https from 'https'
 import fs from 'fs' */
 const app = express() // Se crea una instancia de la aplicación Express
@@ -24,5 +25,6 @@ app.use(cookieParser()) // Se utiliza el middleware de cookie-parser para analiz
 
 app.use('/api', localidadesRouter) // Se utiliza el enrutador localidadesRouter para manejar las rutas relacionadas con localidades, que se encuentran bajo el prefijo /api
 app.use('/api', autenticacionRoutes) // Se utiliza el enrutador autenticacionRoutes para manejar las rutas relacionadas con autenticación, que también se encuentran bajo el prefijo /api
+app.use('/api', rutasRouter)
 
 export default app // Se exporta la instancia de la aplicación Express como el módulo predeterminado
