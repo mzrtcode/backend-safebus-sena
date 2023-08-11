@@ -44,14 +44,22 @@ export const crearLocalidad = async (req, res) => {
 
 // Función que maneja la solicitud para actualizar una localidad existente.
 export const actualizarLocalidad = async (req, res) => {
+  const { id } = req.params
+  const { nombre, acronimo } = req.body
   try {
-    const { id } = req.params
-    const { nombre, acronimo } = req.body
-    const [resultado] = await pool.query('UPDATE localidades SET nombre = ?, acronimo = ? WHERE id_localidad = ?', [nombre, acronimo, id])
-    res.status(204).json({ mensaje: 'Localidad actualizada correctamente' })
+    const [resultado] = await pool.query(
+      'UPDATE localidades SET nombre = IFNULL(?, nombre), acronimo = IFNULL(?, acronimo) WHERE id_localidad = ?',
+      [nombre, acronimo, id]
+    )
+
+    if (resultado.affectedRows === 1) {
+      res.status(200).json({ mensaje: 'Localidad actualizada' })
+    } else {
+      res.status(404).json({ mensaje: 'Localidad no encontrada' })
+    }
   } catch (error) {
-    console.log(error)
-    res.status(500).json({ mensaje: 'Error al actualizar la localidad' })
+    console.error(error)
+    res.status(500).json({ mensaje: 'Error al actualizar la localidad', error: error.message })
   }
 }
 
@@ -59,10 +67,15 @@ export const actualizarLocalidad = async (req, res) => {
 export const eliminarLocalidad = async (req, res) => {
   try {
     const { id } = req.params
-    const resultado = await pool.query('DELETE FROM localidades WHERE id_localidad = ?', [id])
-    res.status(204).json({ mensaje: 'Localidad eliminada correctamente' })
+    const [resultado] = await pool.query('DELETE FROM localidades WHERE id_localidad = ?', [id])
+
+    if (resultado.affectedRows === 1) {
+      res.status(204).json({ mensaje: 'Localidad eliminada' })
+    } else {
+      res.status(404).json({ mensaje: 'Localidad no encontrada' })
+    }
   } catch (error) {
-    console.log(error)
-    res.status(500).json({ mensaje: 'Error al eliminar la localidad' })
+    console.error(error)
+    res.status(500).json({ mensaje: 'Error al eliminar la Localidad' })
   }
 }
