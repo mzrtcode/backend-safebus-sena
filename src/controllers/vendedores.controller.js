@@ -1,4 +1,7 @@
 import { pool } from '../db.js'
+import { enviarEmail } from '../utils/mailer.js'
+import { generarClave } from '../utils/password.js'
+import bcrypt from 'bcryptjs'
 
 // Función que maneja la solicitud para obtener todas los vendedores
 export const obtenerVendedores = async (req, res) => {
@@ -23,31 +26,45 @@ export const obtenerVendedor = async (req, res) => {
   }
 }
 
-// Función que maneja la solicitud para crear una nueva localidad.
 export const crearVendedor = async (req, res) => {
-  try {
-    const { nombres, apellidos, tipo_identificacion, numero_identificacion, correo, celular, fecha_nacimiento, direccion } = req.body
+  const {
+    nombres,
+    apellidos,
+    tipo_identificacion,
+    numero_identificacion,
+    correo,
+    celular,
+    fecha_nacimiento,
+    direccion
+  } = req.body
 
-    const [resultado] = await pool.query(
-      'INSERT INTO vendedores (nombres, apellidos, tipo_identificacion, numero_identificacion, correo, celular, fecha_nacimiento, direccion) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [nombres, apellidos, tipo_identificacion, numero_identificacion, correo, celular, fecha_nacimiento, direccion]
-    )
-    const propietarioCreado = {
-      id: resultado.insertId, // Obtener el ID generado por la base de datos
-      nombres,
-      apellidos,
-      tipo_identificacion,
-      numero_identificacion,
-      correo,
-      celular,
-      fecha_nacimiento,
-      direccion
+  const clave = generarClave()
+  console.log({ correo, clave })
+  const claveCifrada = await bcrypt.hash(clave, 10)
+
+  try {
+    // Verificar si el correo electrónico ya está registrado
+    const [existeVendedor] = await pool.query('SELECT * FROM vendedores WHERE correo = ?', [correo])
+    const [existeAdministrador] = await pool.query('SELECT * FROM administradores WHERE correo = ?', [correo])
+
+    if (existeVendedor.length > 0 || existeAdministrador.length > 0) {
+      return res.status(400).json({ message: 'El correo electrónico ya está registrado' })
     }
 
-    res.status(201).json(propietarioCreado)
+    // Insertar el nuevo usuario
+    const [resultado] = await pool.query('INSERT INTO vendedores (nombres, apellidos, tipo_identificacion, numero_identificacion, correo, celular, fecha_nacimiento, direccion, clave) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [nombres, apellidos, tipo_identificacion, numero_identificacion, correo, celular, fecha_nacimiento, direccion, claveCifrada])
+    if (resultado.affectedRows > 0) {
+      await enviarEmail(correo, 'Registro exitoso', `El registro se realizó correctamente
+      Usuario: ${correo}
+      Contraseña: ${clave}
+      `)
+      return res.status(201).json({ message: 'Usuario creado' })
+    } else {
+      return res.status(500).json({ message: 'No se pudo crear el usuario' })
+    }
   } catch (error) {
-    console.log(error)
-    res.status(500).json({ mensaje: 'Error al crear el propietario' })
+    console.error('Error al registrar el usuario:', error)
+    return res.status(500).json({ message: 'Error al registrar el usuario' })
   }
 }
 

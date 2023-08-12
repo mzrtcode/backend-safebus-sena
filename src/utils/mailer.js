@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer'
+import '../config.js'
 
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
@@ -10,11 +11,12 @@ const transporter = nodemailer.createTransport({
   }
 })
 
+// Verificar conexión con el servidor SMTP
 transporter.verify().then(() => {
-  console.log('Ready for send emails')
+  console.log('Listo para enviar emails')
 })
 
-const template = `
+/* const template = `
 <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
     <div style="text-align: center; position: relative;">
         <img src="https://user-images.githubusercontent.com/71569136/260169335-730b248d-62b8-4405-86e7-828d4aa664ee.png" alt="Logo" style="width: 200px; margin-top: 50px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
@@ -34,16 +36,19 @@ const template = `
         <p>El equipo de [Nombre de la Compañía]</p>
     </div>
 </body>
-`
+` */
 
-async function main () {
-  // send mail with defined transport object
+export async function enviarEmail (destinatarios, asunto, template) {
+  // Si destinatarios es una cadena de texto, conviértela en un array
+  if (typeof destinatarios === 'string') {
+    destinatarios = destinatarios.split(',').map(email => email.trim())
+  }
+
+  // Enviar el correo con el objeto de transporte definido
   const info = await transporter.sendMail({
-    from: '"SafeBusApp 🚌" <infosafebusapp@gmail.com>', // sender address
-    to: 'stvnm33@gmail.com, stvnm33@gmail.com', // list of receivers
-    subject: 'Hola a todos', // Subject line
+    from: '"SafeBusApp 🚌" <infosafebusapp@gmail.com>',
+    to: destinatarios.join(', '),
+    subject: asunto,
     html: template
   })
 }
-
-main().catch(console.error)

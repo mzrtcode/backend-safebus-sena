@@ -2,6 +2,8 @@ import { pool } from '../db.js'
 import jwt from 'jsonwebtoken'
 import { crearTokenAcceso } from '../libs/jwt.js'
 import bcrypt from 'bcryptjs'
+import { enviarEmail } from '../utils/mailer.js'
+import { generarClave } from '../utils/password.js'
 const TOKEN_SECRETO = process.env.TOKEN_SECRET
 
 // Función que maneja la solicitud de inicio de sesión de un usuario.
@@ -139,7 +141,6 @@ export const registrarUsuario = async (req, res) => {
     celular,
     fecha_nacimiento,
     direccion,
-    clave,
     rol
   } = req.body
 
@@ -153,20 +154,25 @@ export const registrarUsuario = async (req, res) => {
     return res.status(400).json({ message: 'Rol inválido' })
   }
 
+  const clave = generarClave()
+  console.log({ correo, clave })
   const claveCifrada = await bcrypt.hash(clave, 10)
 
   try {
     // Verificar si el correo electrónico ya está registrado
-    const existeUsuario = await pool.query(`SELECT * FROM ${tabla} WHERE correo = ?`, [correo])
+    const [existeUsuario] = await pool.query(`SELECT * FROM ${tabla} WHERE correo = ?`, [correo])
 
     if (existeUsuario.length > 0) {
       return res.status(400).json({ message: 'El correo electrónico ya está registrado' })
     }
 
     // Insertar el nuevo usuario
-    const resultado = await pool.query(`INSERT INTO ${tabla} (nombres, apellidos, tipo_identificacion, numero_identificacion, correo, celular, fecha_nacimiento, direccion, clave) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, [nombres, apellidos, tipo_identificacion, numero_identificacion, correo, celular, fecha_nacimiento, direccion, claveCifrada])
-
+    const [resultado] = await pool.query(`INSERT INTO ${tabla} (nombres, apellidos, tipo_identificacion, numero_identificacion, correo, celular, fecha_nacimiento, direccion, clave) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, [nombres, apellidos, tipo_identificacion, numero_identificacion, correo, celular, fecha_nacimiento, direccion, claveCifrada])
     if (resultado.affectedRows > 0) {
+      await enviarEmail(correo, 'Registro exitoso', `El registro se realizó correctamente
+      Usuario: ${correo}
+      Contraseña: ${clave}
+      `)
       return res.status(201).json({ message: 'Usuario creado' })
     } else {
       return res.status(500).json({ message: 'No se pudo crear el usuario' })

@@ -35,9 +35,9 @@ export const registroSchema = z.object({
   direccion: z.string({
     required_error: 'La dirección es requerida'
   }),
-  clave: z.string({
+  /*  clave: z.string({
     required_error: 'La clave es requerida'
-  }),
+  }), */
   rol: z
     .literal('administrador', 'vendedor')
 })
