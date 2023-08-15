@@ -59,13 +59,18 @@ async function verificarCredenciales (tabla, correo, clave) {
         rol: tabla === 'administradores' ? 'administrador' : 'vendedor'
       }
 
-      // Comparar la contraseña cifrada con la contraseña proporcionada
-      const esClaveCorrecta = await bcrypt.compare(clave, usuario.clave)
+      // Verificar si el estado del usuario es 1 (habilitado)
+      if (usuario.estado === 1) {
+        // Comparar la contraseña cifrada con la contraseña proporcionada
+        const esClaveCorrecta = await bcrypt.compare(clave, usuario.clave)
 
-      if (esClaveCorrecta) {
-        return { success: true, datos } // Devuelve un objeto con la propiedad "success" y los datos del usuario
+        if (esClaveCorrecta) {
+          return { success: true, datos } // Devuelve un objeto con la propiedad "success" y los datos del usuario
+        } else {
+          return { success: false, datos } // Devuelve un objeto con la propiedad "success" y los datos del usuario
+        }
       } else {
-        return { success: false, datos } // Devuelve un objeto con la propiedad "success" y los datos del usuario
+        return { success: false, mensaje: 'El usuario no está habilitado.' }
       }
     }
 

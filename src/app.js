@@ -24,7 +24,7 @@ const app = express() // Se crea una instancia de la aplicación Express
 
 const server = https.createServer(options, app)
  */
-app.use(cors({ origin: 'http://localhost:5173', credentials: true })) // Se utiliza el middleware de CORS para permitir solicitudes cruzadas desde http://localhost:5173
+app.use(cors({ origin: ['http://localhost:5173', 'http://safebusapp.com'], credentials: true })) // Se utiliza el middleware de CORS para permitir solicitudes cruzadas desde http://localhost:5173
 app.use(morgan('dev')) // Se utiliza el middleware de morgan en el formato "dev" para el registro de solicitudes HTTP en la consola
 app.use(express.json()) // Se utiliza el middleware de express.json() para analizar los cuerpos de solicitud en formato JSON
 app.use(cookieParser()) // Se utiliza el middleware de cookie-parser para analizar las cookies de las solicitudes entrantes

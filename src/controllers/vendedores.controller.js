@@ -71,13 +71,12 @@ export const crearVendedor = async (req, res) => {
 // Función que maneja la solicitud para actualizar una localidad existente.
 export const actualizarVendedor = async (req, res) => {
   const { id } = req.params
-  const { nombres, apellidos, tipo_identificacion, numero_identificacion, correo, celular, fecha_nacimiento, direccion } = req.body
+  const { nombres, apellidos, tipo_identificacion, numero_identificacion, correo, celular, fecha_nacimiento, direccion, estado } = req.body
   try {
     const [resultado] = await pool.query(
-      'UPDATE vendedores SET nombres = IFNULL(?, nombres), apellidos = IFNULL(?, apellidos), tipo_identificacion = IFNULL(?, tipo_identificacion), numero_identificacion = IFNULL(?, numero_identificacion), correo = IFNULL(?, correo), celular = IFNULL(?, celular), fecha_nacimiento = IFNULL(?, fecha_nacimiento), direccion = IFNULL(?, direccion) WHERE id_propietario = ?',
-      [nombres, apellidos, tipo_identificacion, numero_identificacion, correo, celular, fecha_nacimiento, direccion, id]
+      'UPDATE vendedores SET nombres = IFNULL(?, nombres), apellidos = IFNULL(?, apellidos), tipo_identificacion = IFNULL(?, tipo_identificacion), numero_identificacion = IFNULL(?, numero_identificacion), correo = IFNULL(?, correo), celular = IFNULL(?, celular), fecha_nacimiento = IFNULL(?, fecha_nacimiento), direccion = IFNULL(?, direccion), estado = IFNULL(?, estado) WHERE id_vendedor = ?',
+      [nombres, apellidos, tipo_identificacion, numero_identificacion, correo, celular, fecha_nacimiento, direccion, estado, id]
     )
-
     if (resultado.affectedRows === 1) {
       res.status(200).json({ mensaje: 'Vendedor actualizado' })
     } else {
@@ -103,5 +102,37 @@ export const eliminarVendedor = async (req, res) => {
   } catch (error) {
     console.error(error)
     res.status(500).json({ mensaje: 'Error al eliminar el vendedor' })
+  }
+}
+
+export const resetearClave = async (req, res) => {
+  const { id } = req.params
+  const clave = generarClave()
+  const claveCifrada = await bcrypt.hash(clave, 10)
+
+  try {
+    let [vendedor] = await pool.query('SELECT correo FROM vendedores WHERE id_vendedor = ?', [id])
+
+    if (vendedor.length === 0) {
+      return res.status(404).json({ mensaje: 'Vendedor no encontrado' })
+    }
+
+    vendedor = vendedor[0]
+
+    const [resultado] = await pool.query('UPDATE vendedores SET clave = ? WHERE id_vendedor = ?', [claveCifrada, id])
+
+    if (resultado.affectedRows === 1) {
+      await enviarEmail(vendedor.correo, 'Clave actualizada', `La clave se actualizó correctamente
+      Usuario: ${vendedor.correo}
+      Contraseña: ${clave}
+      `)
+
+      return res.status(200).json({ mensaje: 'Clave actualizada' })
+    } else {
+      return res.status(404).json({ mensaje: 'Vendedor no encontrado' })
+    }
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ mensaje: 'Error al actualizar la clave del vendedor' })
   }
 }
