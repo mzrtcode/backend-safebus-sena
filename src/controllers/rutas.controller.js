@@ -8,7 +8,14 @@ export const obtenerRutas = async (req, res) => {
     JOIN localidades AS l1 ON r.inicio_ruta = l1.id_localidad
     JOIN localidades AS l2 ON r.fin_ruta = l2.id_localidad;
     `)
-    res.status(200).json({ data: resultado })
+
+    // Convierte los Buffers de estado a números
+    const rutasConEstadoNumerico = resultado.map(ruta => ({
+      ...ruta,
+      estado: ruta.estado[0] // Suponiendo que el estado es siempre un solo número en el Buffer
+    }))
+
+    res.status(200).json({ data: rutasConEstadoNumerico })
   } catch (error) {
     console.log(error)
     res.status(500).json({ mensaje: 'Error al obtener las rutas' })
