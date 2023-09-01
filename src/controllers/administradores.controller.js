@@ -74,7 +74,7 @@ export const actualizarAdministrador = async (req, res) => {
   const { nombres, apellidos, tipo_identificacion, numero_identificacion, correo, celular, fecha_nacimiento, direccion, estado } = req.body
   try {
     const [resultado] = await pool.query(
-      'UPDATE administradores SET nombres = IFNULL(?, nombres), apellidos = IFNULL(?, apellidos), tipo_identificacion = IFNULL(?, tipo_identificacion), numero_identificacion = IFNULL(?, numero_identificacion), correo = IFNULL(?, correo), celular = IFNULL(?, celular), fecha_nacimiento = IFNULL(?, fecha_nacimiento), direccion = IFNULL(?, direccion), estado = IFNULL(?, estado) WHERE id_vendedor = ?',
+      'UPDATE administradores SET nombres = IFNULL(?, nombres), apellidos = IFNULL(?, apellidos), tipo_identificacion = IFNULL(?, tipo_identificacion), numero_identificacion = IFNULL(?, numero_identificacion), correo = IFNULL(?, correo), celular = IFNULL(?, celular), fecha_nacimiento = IFNULL(?, fecha_nacimiento), direccion = IFNULL(?, direccion), estado = IFNULL(?, estado) WHERE id_administrador = ?',
       [nombres, apellidos, tipo_identificacion, numero_identificacion, correo, celular, fecha_nacimiento, direccion, estado, id]
     )
     if (resultado.affectedRows === 1) {
@@ -92,7 +92,7 @@ export const actualizarAdministrador = async (req, res) => {
 export const eliminarAdministrador = async (req, res) => {
   try {
     const { id } = req.params
-    const [resultado] = await pool.query('DELETE FROM administradores WHERE id_vendedor = ?', [id])
+    const [resultado] = await pool.query('DELETE FROM administradores WHERE id_administrador = ?', [id])
 
     if (resultado.affectedRows === 1) {
       res.status(204).json({ mensaje: 'Administrador eliminado' })

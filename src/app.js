@@ -11,6 +11,7 @@ import propietariosRouter from './routes/propietarios.routes.js'
 import vehiculosRouter from './routes/vehiculos.routes.js'
 import agenciasRouter from './routes/agencias.routes.js'
 import vendedoresRouter from './routes/vendedores.routes.js'
+import administradoresRouter from './routes/administradores.routes.js'
 
 /* import https from 'https'
 import fs from 'fs' */
@@ -37,5 +38,6 @@ app.use('/api', propietariosRouter)
 app.use('/api', vehiculosRouter)
 app.use('/api', agenciasRouter)
 app.use('/api', vendedoresRouter)
+app.use('/api', administradoresRouter)
 
 export default app // Se exporta la instancia de la aplicación Express como el módulo predeterminado
