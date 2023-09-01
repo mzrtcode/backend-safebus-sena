@@ -119,7 +119,7 @@ export const resetearClave = async (req, res) => {
 
     administrador = administrador[0]
 
-    const [resultado] = await pool.query('UPDATE administrador SET clave = ? WHERE id_administrador = ?', [claveCifrada, id])
+    const [resultado] = await pool.query('UPDATE administradores SET clave = ? WHERE id_administrador = ?', [claveCifrada, id])
 
     if (resultado.affectedRows === 1) {
       await enviarEmail(administrador.correo, 'Clave actualizada', `La clave se actualizó correctamente
