@@ -32,8 +32,10 @@ export const iniciarSesion = async (req, res) => {
       nombres: vendedorDatos.nombres,
       apellidos: vendedorDatos.apellidos,
       correo: vendedorDatos.correo,
-      rol: vendedorDatos.rol
+      rol: vendedorDatos.rol,
+      id_usuario: vendedorDatos.id_usuario
     }
+
     const token = await crearTokenAcceso(respuesta)
     res.cookie('token', token)
     console.log(token)
@@ -56,7 +58,8 @@ async function verificarCredenciales (tabla, correo, clave) {
         nombres: resultado[0].nombres,
         apellidos: resultado[0].apellidos,
         correo: usuario.correo,
-        rol: tabla === 'administradores' ? 'administrador' : 'vendedor'
+        rol: tabla === 'administradores' ? 'administrador' : 'vendedor',
+        id_usuario: tabla === 'administradores' ? usuario.id_administrador : usuario.id_vendedor
       }
 
       // Verificar si el estado del usuario es 1 (habilitado)
