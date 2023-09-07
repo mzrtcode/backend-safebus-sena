@@ -15,6 +15,8 @@ export const obtenerPlanillas = async (req, res) => {
     v.apellidos AS apellido_vendedor,
     ve.placa AS numero_placa_vehiculo,
     ve.codigo_interno AS codigo_interno_vehiculo,
+    ve.cantidad_puestos AS cantidad_puestos_vehiculo,
+    r.costo as precio_ruta,
     a.nombre AS nombre_agencia
   FROM
     planillas p
@@ -31,5 +33,48 @@ export const obtenerPlanillas = async (req, res) => {
   } catch (error) {
     console.log(error)
     res.status(500).json({ mensaje: 'Error al obtener las planillas' })
+  }
+}
+
+export const crearPlanilla = async (req, res) => {
+  try {
+    const { id_ruta, id_conductor, id_vehiculo, id_agencia, id_vendedor } = req.body
+    const [resultado] = await pool.query('INSERT INTO planillas (id_ruta, id_conductor, id_vehiculo, id_agencia, id_vendedor) VALUES (?, ?, ?, ?, ?)', [id_ruta, id_conductor, id_vehiculo, id_agencia, id_vendedor])
+    res.status(201).json({ data: resultado })
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ mensaje: 'Error al crear la planilla' })
+  }
+}
+
+export const completarViaje = async (req, res) => {
+  try {
+    const { id } = req.params
+    const [resultado] = await pool.query('UPDATE planillas SET viaje_completado=1 WHERE id_planilla = ?', [id])
+    if (resultado.affectedRows === 1) {
+      res.status(200).json({ mensaje: 'Planilla actualizada' })
+    } else {
+      res.status(404).json({ mensaje: 'Planilla no encontrada' })
+    }
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ mensaje: 'Error al actualizar la planilla' })
+  }
+}
+
+
+export const eliminarPlanilla = async (req, res) => {
+  try {
+    const { id } = req.params
+    const [resultado] = await pool.query('DELETE FROM planillas WHERE id_planilla = ?', [id])
+
+    if (resultado.affectedRows === 1) {
+      res.status(204).json({ mensaje: 'Planilla eliminada' })
+    } else {
+      res.status(404).json({ mensaje: 'Planilla no encontrada' })
+    }
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ mensaje: 'Error al eliminar la Planilla' })
   }
 }
