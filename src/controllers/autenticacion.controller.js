@@ -50,7 +50,7 @@ export const iniciarSesion = async (req, res) => {
 async function verificarCredenciales (tabla, correo, clave) {
   try {
     // Realizar la consulta SQL para obtener el usuario según el correo
-    const [resultado] = await pool.query(`SELECT * FROM ${tabla} WHERE correo = ?`, [correo])
+    const [resultado] = await pool.query(`SELECT * FROM ${tabla} WHERE estado = 1 AND correo = ?`, [correo])
 
     if (resultado.length > 0) {
       const usuario = resultado[0]
