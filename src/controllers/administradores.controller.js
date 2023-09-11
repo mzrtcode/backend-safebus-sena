@@ -7,7 +7,11 @@ import bcrypt from 'bcryptjs'
 export const obtenerAdministradores = async (req, res) => {
   try {
     const [resultado] = await pool.query('SELECT * FROM administradores')
-    res.status(200).json({ data: resultado })
+    const administradoresConEstadoBooleano = resultado.map((administrador) => ({
+      ...administrador,
+      estado: administrador.estado === 1 ? true : false,
+    }))
+    res.status(200).json({ data: administradoresConEstadoBooleano })
   } catch (error) {
     console.log(error)
     res.status(500).json({ mensaje: 'Error al obtener los administradores' })
