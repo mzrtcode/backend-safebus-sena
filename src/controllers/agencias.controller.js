@@ -4,7 +4,11 @@ import { pool } from '../db.js'
 export const obtenerAgencias = async (req, res) => {
   try {
     const [resultado] = await pool.query('SELECT * FROM agencias')
-    res.status(200).json({ data: resultado })
+    const agenciasConEstadoBooleano = resultado.map((agencia) =>({
+      ...agencia,
+      estado: agencia.estado === 1 ? true : false
+    }))
+    res.status(200).json({ data: agenciasConEstadoBooleano })
   } catch (error) {
     console.log(error)
     res.status(500).json({ mensaje: 'Error al obtener los agencias' })
