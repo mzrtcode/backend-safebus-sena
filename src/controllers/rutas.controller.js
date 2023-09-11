@@ -9,13 +9,12 @@ export const obtenerRutas = async (req, res) => {
     JOIN localidades AS l2 ON r.fin_ruta = l2.id_localidad;
     `)
 
-    // Convierte los Buffers de estado a números
-    const rutasConEstadoNumerico = resultado.map(ruta => ({
+    const rutasConEstadoBooleano  = resultado.map((ruta) => ({
       ...ruta,
-      estado: ruta.estado[0] // Suponiendo que el estado es siempre un solo número en el Buffer
-    }))
+      estado: ruta.estado === 1 ? true : false,
+    }));
 
-    res.status(200).json({ data: rutasConEstadoNumerico })
+    res.status(200).json({ data: rutasConEstadoBooleano })
   } catch (error) {
     console.log(error)
     res.status(500).json({ mensaje: 'Error al obtener las rutas' })
@@ -25,6 +24,7 @@ export const obtenerRutas = async (req, res) => {
 export const crearRuta = async (req, res) => {
   try {
     const { inicio_ruta, fin_ruta, costo } = req.body
+    if(inicio_ruta === fin_ruta ) return res.status(400).json({mensaje : "El inicio y el fin de la ruta deben ser diferentes."})
     const [resultado] = await pool.query('INSERT INTO rutas (inicio_ruta, fin_ruta, costo) VALUES (?,?,?)', [inicio_ruta, fin_ruta, costo])
 
     const rutaCreada = {
