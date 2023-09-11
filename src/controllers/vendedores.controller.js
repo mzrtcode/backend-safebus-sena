@@ -7,7 +7,11 @@ import bcrypt from 'bcryptjs'
 export const obtenerVendedores = async (req, res) => {
   try {
     const [resultado] = await pool.query('SELECT * FROM vendedores')
-    res.status(200).json({ data: resultado })
+    const vendedoresConEstadoBooleano = resultado.map((vendedor) => ({
+      ...vendedor,
+      estado: vendedor.estado === 1 ? true : false,
+    }))
+    res.status(200).json({ data: vendedoresConEstadoBooleano })
   } catch (error) {
     console.log(error)
     res.status(500).json({ mensaje: 'Error al obtener las vendedores' })
