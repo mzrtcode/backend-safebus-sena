@@ -17,12 +17,12 @@ export const autenticacionRequerida = (req, res, next) => {
 // Middleware para administradores
 export const autenticacionAdmin = (req, res, next) => {
   const { token } = req.cookies;
-
   if (!token) return res.status(401).json({ message: 'No token, No autorizado' });
   jwt.verify(token, TOKEN_SECRETO, (err, decoded) => {
+    console.log(decoded)
     if (err) return res.status(401).json({ message: 'Token invalido' });
-    if (decoded.role !== 'administrador') {
-      return res.status(403).json({ message: 'Acceso no autorizado para administradores' });
+    if (decoded.rol !== 'administrador') {
+      return res.status(403).json({ message: 'Acceso no autorizado para vendedores' });
     }
     req.usuario = decoded;
     next();
@@ -36,8 +36,8 @@ export const autenticacionVendedor = (req, res, next) => {
   if (!token) return res.status(401).json({ message: 'No token, No autorizado' });
   jwt.verify(token, TOKEN_SECRETO, (err, decoded) => {
     if (err) return res.status(401).json({ message: 'Token invalido' });
-    if (decoded.role !== 'vendedor') {
-      return res.status(403).json({ message: 'Acceso no autorizado para vendedores' });
+    if (decoded.rol !== 'vendedor') {
+      return res.status(403).json({ message: 'Acceso no autorizado para administradores' });
     }
     req.usuario = decoded;
     next();

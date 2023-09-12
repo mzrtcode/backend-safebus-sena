@@ -4,8 +4,8 @@ import { autenticacionAdmin, autenticacionRequerida } from '../middlewares/valid
 
 const router = Router()
 
-router.get('/vendedores',autenticacionRequerida, obtenerVendedores)
-router.get('/vendedores/:id', autenticacionRequerida, obtenerVendedor)
+router.get('/vendedores',autenticacionAdmin, obtenerVendedores)
+router.get('/vendedores/:id', autenticacionAdmin, obtenerVendedor)
 router.post(
   '/vendedores',
   autenticacionAdmin, // Middleware para validar la autenticación requerida antes de crear una localidad.
