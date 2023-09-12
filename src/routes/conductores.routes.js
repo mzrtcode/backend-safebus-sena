@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { actualizarConductor, crearConductor, eliminarConductor, obtenerConductor, obtenerConductores } from '../controllers/conductores.controller.js'
-import { autenticacionRequerida } from '../middlewares/validarToken.middleware.js'
+import { autenticacionAdmin, autenticacionRequerida } from '../middlewares/validarToken.middleware.js'
 
 const router = Router()
 

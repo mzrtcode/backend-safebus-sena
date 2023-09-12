@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { actualizarPropietario, crearPropietario, eliminarPropietario, obtenerPropietario, obtenerPropietarios } from '../controllers/propietarios.controller.js'
-import { autenticacionRequerida } from '../middlewares/validarToken.middleware.js'
+import { autenticacionAdmin, autenticacionRequerida } from '../middlewares/validarToken.middleware.js'
 
 const router = Router()
 
