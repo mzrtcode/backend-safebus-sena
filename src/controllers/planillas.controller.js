@@ -21,7 +21,9 @@ export const obtenerPlanillas = async (req, res) => {
         ve.codigo_interno AS codigo_interno_vehiculo,
         ve.cantidad_puestos AS cantidad_puestos_vehiculo,
         r.costo as precio_ruta,
-        a.nombre AS nombre_agencia
+        a.nombre AS nombre_agencia,
+        lr.acronimo AS acronimo_inicio,
+        lf.acronimo AS acronimo_fin
       FROM
         planillas p
         JOIN rutas r ON p.id_ruta = r.id_ruta
