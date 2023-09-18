@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
 
 // Verificar conexión con el servidor SMTP
 transporter.verify().then(() => {
-  console.log('Listo para enviar emails')
+  console.log('✔  Listo para enviar emails')
 })
 
 /* const template = `

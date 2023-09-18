@@ -9,7 +9,7 @@ export const pool = createPool({
 
 pool.getConnection()
   .then(connection => {
-    console.log(':: Conectado a la base de datos ::')
+    console.log('✔:: Conectado a la base de datos ::')
     connection.release()
   })
   .catch(err => {

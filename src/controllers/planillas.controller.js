@@ -1,4 +1,5 @@
 import { pool } from '../db.js'
+import { obtenerFechaHoraMySQL } from '../utils/utils.js';
 
 // Función que maneja la solicitud para obtener todas los Agencias
 export const obtenerPlanillas = async (req, res) => {
@@ -67,7 +68,7 @@ export const crearPlanilla = async (req, res) => {
 export const completarViaje = async (req, res) => {
   try {
     const { id } = req.params
-    const [resultado] = await pool.query('UPDATE planillas SET viaje_completado=1 WHERE id_planilla = ?', [id])
+    const [resultado] = await pool.query('UPDATE planillas SET viaje_completado=1, hora_salida = ?  WHERE id_planilla = ?', [obtenerFechaHoraMySQL(),id])
     if (resultado.affectedRows === 1) {
       res.status(200).json({ mensaje: 'Planilla actualizada' })
     } else {

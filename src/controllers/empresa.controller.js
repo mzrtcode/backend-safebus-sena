@@ -3,7 +3,7 @@ import { pool } from '../db.js'
 // Función que maneja la solicitud para obtener todas los conductores
 export const obtenerEmpresa = async (req, res) => {
   try {
-    const [resultado] = await pool.query('SELECT * FROM empresa LIMIT 1')
+    const [resultado] = await pool.query('SELECT nit, razon_social, direccion, telefono, ciudad FROM empresa LIMIT 1')
     res.status(200).json({ data: resultado })
   } catch (error) {
     console.log(error)
