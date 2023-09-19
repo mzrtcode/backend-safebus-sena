@@ -15,6 +15,8 @@ import administradoresRouter from './routes/administradores.routes.js'
 import planillasRouter from './routes/planillas.routes.js'
 import tiquetesRouter from './routes/tiquetes.routes.js'
 import empresaRouter from './routes/empresa.routes.js'
+import estadisticasRouter from './routes/estadisticas.routes.js'
+
 
 
 
@@ -23,6 +25,7 @@ import fs from 'fs' */
 const app = express() // Se crea una instancia de la aplicación Express
 
 // Configurar opciones del servidor HTTPS
+
 /* const options = {
   key: fs.readFileSync('../server.key'),
   cert: fs.readFileSync('../server.crt')
@@ -47,5 +50,7 @@ app.use('/api', administradoresRouter)
 app.use('/api', planillasRouter)
 app.use('/api', tiquetesRouter)
 app.use('/api', empresaRouter)
+app.use('/api', estadisticasRouter)
+
 
 export default app // Se exporta la instancia de la aplicación Express como el módulo predeterminado
