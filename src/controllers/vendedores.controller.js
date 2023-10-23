@@ -1,142 +1,88 @@
-import { pool } from '../db.js'
-import { enviarEmail } from '../utils/mailer.js'
-import { generarClave } from '../utils/password.js'
-import bcrypt from 'bcryptjs'
+import VendedorService from "../services/vendedores.service.js"
 
-// Función que maneja la solicitud para obtener todas los vendedores
+// Instancia de la clase VendedorService
+const vendedorService = new VendedorService();
+
+
 export const obtenerVendedores = async (req, res) => {
   try {
-    const [resultado] = await pool.query('SELECT * FROM vendedores')
-    const vendedoresConEstadoBooleano = resultado.map((vendedor) => ({
-      ...vendedor,
-      estado: vendedor.estado === 1 ? true : false,
-    }))
-    res.status(200).json({ data: vendedoresConEstadoBooleano })
+    const resultado = await vendedorService.obtenerVendedores(); // Llama al método del servicio
+    res.status(200).json(resultado);
   } catch (error) {
-    console.log(error)
-    res.status(500).json({ mensaje: 'Error al obtener las vendedores' })
+    console.error(`Ocurrió un error: ${error.message}`);
+    res.status(500).json({ mensaje: 'Error al obtener las vendedores' });
   }
-}
+};
 
 // Función que maneja la solicitud para obtener una localidad por su ID
 export const obtenerVendedor = async (req, res) => {
   try {
-    const { id } = req.params
-    const [resultado] = await pool.query('SELECT * FROM vendedores WHERE id_vendedor = ?', [id])
-    res.status(200).json({ data: resultado })
+    const { id } = req.params;
+    const resultado = await vendedorService.obtenerVendedor(id); // Llama al método del servicio
+    res.status(200).json(resultado);
   } catch (error) {
-    console.log(error)
-    res.status(500).json({ mensaje: 'Error al obtener el vendedor' })
+    console.log(error);
+    res.status(500).json({ mensaje: 'Error al obtener el vendedor' });
   }
-}
+};
+
 
 export const crearVendedor = async (req, res) => {
-  const {
-    nombres,
-    apellidos,
-    tipo_identificacion,
-    numero_identificacion,
-    correo,
-    celular,
-    fecha_nacimiento,
-    direccion
-  } = req.body
-
-  const clave = generarClave()
-  console.log({ correo, clave })
-  const claveCifrada = await bcrypt.hash(clave, 10)
-
   try {
-    // Verificar si el correo electrónico ya está registrado
-    const [existeVendedor] = await pool.query('SELECT * FROM vendedores WHERE correo = ?', [correo])
-    const [existeAdministrador] = await pool.query('SELECT * FROM administradores WHERE correo = ?', [correo])
+    const resultado = await vendedorService.crearVendedor(req.body); // Llama al método del servicio
+    const { status, message } = resultado;
 
-    if (existeVendedor.length > 0 || existeAdministrador.length > 0) {
-      return res.status(400).json({ message: 'El correo electrónico ya está registrado' })
-    }
-
-    // Insertar el nuevo usuario
-    const [resultado] = await pool.query('INSERT INTO vendedores (nombres, apellidos, tipo_identificacion, numero_identificacion, correo, celular, fecha_nacimiento, direccion, clave) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [nombres, apellidos, tipo_identificacion, numero_identificacion, correo, celular, fecha_nacimiento, direccion, claveCifrada])
-    if (resultado.affectedRows > 0) {
-      await enviarEmail(correo, 'Registro exitoso', `El registro se realizó correctamente
-      Usuario: ${correo}
-      Contraseña: ${clave}
-      `)
-      return res.status(201).json({ message: 'Usuario creado' })
+    if (status === 201) {
+      return res.status(201).json({ message });
+    } else if (status === 400) {
+      return res.status(400).json({ message });
     } else {
-      return res.status(500).json({ message: 'No se pudo crear el usuario' })
+      return res.status(500).json({ message });
     }
   } catch (error) {
-    console.error('Error al registrar el usuario:', error)
-    return res.status(500).json({ message: 'Error al registrar el usuario' })
+    console.error('Error en el controlador:', error);
+    return res.status(500).json({ message: 'Error interno del servidor' });
   }
-}
+};
 
 // Función que maneja la solicitud para actualizar una localidad existente.
 export const actualizarVendedor = async (req, res) => {
-  const { id } = req.params
-  const { nombres, apellidos, tipo_identificacion, numero_identificacion, correo, celular, fecha_nacimiento, direccion, estado } = req.body
+  const { id } = req.params;
+  const vendedor = req.body;
   try {
-    const [resultado] = await pool.query(
-      'UPDATE vendedores SET nombres = IFNULL(?, nombres), apellidos = IFNULL(?, apellidos), tipo_identificacion = IFNULL(?, tipo_identificacion), numero_identificacion = IFNULL(?, numero_identificacion), correo = IFNULL(?, correo), celular = IFNULL(?, celular), fecha_nacimiento = IFNULL(?, fecha_nacimiento), direccion = IFNULL(?, direccion), estado = IFNULL(?, estado) WHERE id_vendedor = ?',
-      [nombres, apellidos, tipo_identificacion, numero_identificacion, correo, celular, fecha_nacimiento, direccion, estado, id]
-    )
-    if (resultado.affectedRows === 1) {
-      res.status(200).json({ mensaje: 'Vendedor actualizado' })
-    } else {
-      res.status(404).json({ mensaje: 'Vendedor no encontrado' })
-    }
+    const resultado = await vendedorService.actualizarVendedor(id, vendedor); // Llama al método del servicio
+    const { status, mensaje } = resultado;
+
+    res.status(status).json({ mensaje });
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ mensaje: 'Error al actualizar el vendedor', error: error.message })
+    console.error('Error en el controlador:', error);
+    res.status(500).json({ mensaje: 'Error interno del servidor' });
   }
-}
+};
 
 // Función que maneja la solicitud para eliminar una localidad existente.
 export const eliminarVendedor = async (req, res) => {
+  const { id } = req.params;
   try {
-    const { id } = req.params
-    const [resultado] = await pool.query('DELETE FROM vendedores WHERE id_vendedor = ?', [id])
+    const resultado = await vendedorService.eliminarVendedor(id); // Llama al método del servicio
+    const { status, mensaje } = resultado;
 
-    if (resultado.affectedRows === 1) {
-      res.status(204).json({ mensaje: 'Vendedor eliminado' })
-    } else {
-      res.status(404).json({ mensaje: 'Vendedor no encontrado' })
-    }
+    res.status(status).json({ mensaje });
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ mensaje: 'Error al eliminar el vendedor' })
+    console.error('Error en el controlador:', error);
+    res.status(500).json({ mensaje: 'Error interno del servidor' });
   }
-}
+};
 
 export const resetearClave = async (req, res) => {
-  const { id } = req.params
-  const clave = generarClave()
-  const claveCifrada = await bcrypt.hash(clave, 10)
-
+  const { id } = req.params;
   try {
-    let [vendedor] = await pool.query('SELECT correo FROM vendedores WHERE id_vendedor = ?', [id])
+    const resultado = await vendedorService.resetearClave(id); // Llama al método del servicio
+    const { status, mensaje } = resultado;
 
-    if (vendedor.length === 0) {
-      return res.status(404).json({ mensaje: 'Vendedor no encontrado' })
-    }
-
-    vendedor = vendedor[0]
-
-    const [resultado] = await pool.query('UPDATE vendedores SET clave = ? WHERE id_vendedor = ?', [claveCifrada, id])
-
-    if (resultado.affectedRows === 1) {
-      await enviarEmail(vendedor.correo, 'Clave actualizada', `La clave se actualizó correctamente
-      Usuario: ${vendedor.correo}
-      Contraseña: ${clave}
-      `)
-
-      return res.status(200).json({ mensaje: 'Clave actualizada' })
-    } else {
-      return res.status(404).json({ mensaje: 'Vendedor no encontrado' })
-    }
+    res.status(status).json({ mensaje });
   } catch (error) {
-    console.error(error)
-    return res.status(500).json({ mensaje: 'Error al actualizar la clave del vendedor' })
+    console.error('Error en el controlador:', error);
+    res.status(500).json({ mensaje: 'Error interno del servidor' });
   }
-}
+};
