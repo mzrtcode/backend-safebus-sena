@@ -1,5 +1,5 @@
 import { pool } from '../db.js'
-import { obtenerFechaHoraMySQL } from '../utils/utils.js';
+import { calcularHoraSalida, obtenerFechaHoraMySQL } from '../utils/utils.js';
 
 // Función que maneja la solicitud para obtener todas los Agencias
 export const obtenerPlanillas = async (req, res) => {
@@ -56,9 +56,10 @@ export const obtenerPlanillas = async (req, res) => {
 
 
 export const crearPlanilla = async (req, res) => {
+   const hora_salida = calcularHoraSalida(new Date());
   try {
     const { id_ruta, id_conductor, id_vehiculo, id_agencia, id_vendedor } = req.body
-    const [resultado] = await pool.query('INSERT INTO planillas (id_ruta, id_conductor, id_vehiculo, id_agencia, id_vendedor) VALUES (?, ?, ?, ?, ?)', [id_ruta, id_conductor, id_vehiculo, id_agencia, id_vendedor])
+    const [resultado] = await pool.query('INSERT INTO planillas (id_ruta, id_conductor, id_vehiculo, id_agencia, id_vendedor, hora_salida) VALUES (?, ?, ?, ?, ?, ?)', [id_ruta, id_conductor, id_vehiculo, id_agencia, id_vendedor, hora_salida])
     res.status(201).json({ data: resultado })
   } catch (error) {
     console.log(error)
@@ -69,7 +70,7 @@ export const crearPlanilla = async (req, res) => {
 export const completarViaje = async (req, res) => {
   try {
     const { id } = req.params
-    const [resultado] = await pool.query('UPDATE planillas SET viaje_completado=1, hora_salida = ?  WHERE id_planilla = ?', [obtenerFechaHoraMySQL(),id])
+    const [resultado] = await pool.query('UPDATE planillas SET viaje_completado=1 WHERE id_planilla = ?', [obtenerFechaHoraMySQL(),id])
     if (resultado.affectedRows === 1) {
       res.status(200).json({ mensaje: 'Planilla actualizada' })
     } else {
