@@ -5,8 +5,8 @@ import { autenticacionRequerida, autenticacionVendedor } from '../middlewares/va
 const router = Router()
 router.get('/planillas', autenticacionRequerida, obtenerPlanillas)
 router.post('/planillas', autenticacionVendedor, crearPlanilla)
-router.post('/planillas/despachar/:id',autenticacionVendedor, completarViaje)
-router.post('/planillas/:id', autenticacionRequerida, eliminarPlanilla)
+router.put('/planillas/despachar/:id',autenticacionVendedor, completarViaje)
+router.delete('/planillas/:id', autenticacionRequerida, eliminarPlanilla)
 
 
 export default router
