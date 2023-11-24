@@ -23,6 +23,7 @@ export const obtenerPlanillas = async (req, res) => {
         ve.cantidad_puestos AS cantidad_puestos_vehiculo,
         r.costo as precio_ruta,
         a.nombre AS nombre_agencia,
+        a.direccion AS direccion_agencia,
         lr.acronimo AS acronimo_inicio,
         lf.acronimo AS acronimo_fin
       FROM
