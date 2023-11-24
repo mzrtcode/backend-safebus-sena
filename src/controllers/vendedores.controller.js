@@ -30,10 +30,11 @@ export const obtenerVendedor = async (req, res) => {
 export const crearVendedor = async (req, res) => {
   try {
     const resultado = await vendedorService.crearVendedor(req.body); // Llama al método del servicio
-    const { status, message } = resultado;
+    const { status, message, id } = resultado;
+
 
     if (status === 201) {
-      return res.status(201).json({ message });
+      return res.status(201).json({ usuarioCreado});
     } else if (status === 400) {
       return res.status(400).json({ message });
     } else {
