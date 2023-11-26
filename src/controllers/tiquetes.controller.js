@@ -43,6 +43,14 @@ export const registrarTiquete = async (req, res) => {
                 puestos_vendidos
             };
 
+            // Detectar automáticamente el dominio o la IP de la aplicación
+            const dominio = `${req.protocol}://${req.get('host')}`;
+
+            // Construir la URL completa del tiquete
+            const urlTiquete = `${dominio}/tiquetes/${id_planilla}`;
+
+            // Configurar la cabecera Location y responder con el tiquete creado
+            res.setHeader('Location', urlTiquete);
             res.status(201).json(tiqueteCreado);
         } else {
             // Si no hay suficientes puestos disponibles, devuelve un error
