@@ -70,7 +70,8 @@ export const crearPlanilla = async (req, res) => {
 export const completarViaje = async (req, res) => {
   try {
     const { id } = req.params
-    const [resultado] = await pool.query('UPDATE planillas SET viaje_completado=1 WHERE id_planilla = ?', [obtenerFechaHoraMySQL(),id])
+    
+    const [resultado] = await pool.query('UPDATE planillas SET viaje_completado=1 WHERE id_planilla = ?', [id])
     if (resultado.affectedRows === 1) {
       res.status(200).json({ mensaje: 'Planilla actualizada' })
     } else {
