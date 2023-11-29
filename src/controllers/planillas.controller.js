@@ -59,8 +59,13 @@ export const crearPlanilla = async (req, res) => {
    const hora_salida = calcularHoraSalida(new Date());
   try {
     const { id_ruta, id_conductor, id_vehiculo, id_agencia, id_vendedor } = req.body
+      // Insertar la nueva planilla
     const [resultado] = await pool.query('INSERT INTO planillas (id_ruta, id_conductor, id_vehiculo, id_agencia, id_vendedor, hora_salida) VALUES (?, ?, ?, ?, ?, ?)', [id_ruta, id_conductor, id_vehiculo, id_agencia, id_vendedor, hora_salida])
-    res.status(201).json({ data: resultado })
+
+     // Obtener la información relacionada con el ID recién insertado
+     const [planillaInsertada] = await pool.query('SELECT * FROM planillas WHERE id_planilla = ?', [resultado.insertId]);
+
+    res.status(201).json(planillaInsertada[0])
   } catch (error) {
     console.log(error)
     res.status(500).json({ mensaje: 'Error al crear la planilla' })

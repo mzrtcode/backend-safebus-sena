@@ -16,6 +16,8 @@ import planillasRouter from './routes/planillas.routes.js'
 import tiquetesRouter from './routes/tiquetes.routes.js'
 import empresaRouter from './routes/empresa.routes.js'
 import estadisticasRouter from './routes/estadisticas.routes.js'
+import reportesRouter from './routes/reportes.routes.js'
+
 
 
 
@@ -51,6 +53,7 @@ app.use('/api', planillasRouter)
 app.use('/api', tiquetesRouter)
 app.use('/api', empresaRouter)
 app.use('/api', estadisticasRouter)
+app.use('/api', reportesRouter)
 
 
 export default app // Se exporta la instancia de la aplicación Express como el módulo predeterminado
