@@ -61,3 +61,20 @@ export const registrarTiquete = async (req, res) => {
         res.status(500).json({ mensaje: 'Error al registrar el tiquete' });
     }
 };
+
+
+export const eliminarTiquete = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [resultado] = await pool.query('DELETE FROM tiquetes WHERE id_tiquete = ?', [id]);
+
+        if (resultado.affectedRows === 0) {
+            return res.status(404).json({ mensaje: 'No existe el tiquete' });
+        }
+
+        res.status(200).json({ mensaje: 'Tiquete eliminado' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: 'Error al eliminar el tiquete' });
+    }
+}
