@@ -30,11 +30,10 @@ export const obtenerVendedor = async (req, res) => {
 export const crearVendedor = async (req, res) => {
   try {
     const resultado = await vendedorService.crearVendedor(req.body); // Llama al método del servicio
-    const { status, message, id } = resultado;
-
+    const { status, message, usuarioCreado } = resultado; // Agrega usuarioCreado aquí
 
     if (status === 201) {
-      return res.status(201).json({ usuarioCreado});
+      return res.status(201).json({ usuarioCreado }); // Corrige el objeto que se envía en caso de éxito
     } else if (status === 400) {
       return res.status(400).json({ message });
     } else {
@@ -45,6 +44,7 @@ export const crearVendedor = async (req, res) => {
     return res.status(500).json({ message: 'Error interno del servidor' });
   }
 };
+
 
 // Función que maneja la solicitud para actualizar una localidad existente.
 export const actualizarVendedor = async (req, res) => {
