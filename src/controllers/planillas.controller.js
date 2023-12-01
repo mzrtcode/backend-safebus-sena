@@ -40,7 +40,7 @@ export const obtenerPlanillas = async (req, res) => {
     const queryParams = [];
 
     if (rol_usuario === 'vendedor') {
-      query += ' WHERE p.id_vendedor = ?';
+      query += ' WHERE p.id_vendedor = ? AND DATE(p.hora_salida) = CURDATE();'
       queryParams.push(id_vendedor);
     }
 
