@@ -1,0 +1,45 @@
+
+
+services:
+  db:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: safebus_db
+    env_file:
+      - .env
+    ports:
+      - "${DB_PORT}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASS}
+    networks:
+      - safebus_network
+
+  app:
+    image: node:20
+    container_name: safebus_app
+    working_dir: /usr/src/app
+    volumes:
+      - .:/usr/src/app
+    env_file:
+      - .env
+    ports:
+      - "${PORT}:${PORT}"
+    command: >
+      sh -c "npm install && npm start"
+    depends_on:
+      - db
+    networks:
+      - safebus_network
+
+volumes:
+  mysql_data:
+
+networks:
+  safebus_network:
