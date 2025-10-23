@@ -236,8 +236,7 @@ docker-compose logs -f --tail=100
 # Logs de un servicio específico
 docker-compose logs db
 ```
-
-![Uploading drawSQL-image-export-2025-10-23.png…]()
+<img width="2830" height="2462" alt="drawSQL-image-export-2025-10-23" src="https://github.com/user-attachments/assets/afcf63f1-d13c-4877-8652-af1bec53b0d1" />
 
 
 ## 📝 Notas Importantes
