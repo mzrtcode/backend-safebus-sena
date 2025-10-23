@@ -237,6 +237,9 @@ docker-compose logs -f --tail=100
 docker-compose logs db
 ```
 
+![Uploading drawSQL-image-export-2025-10-23.png…]()
+
+
 ## 📝 Notas Importantes
 
 - **Persistencia**: Los datos de MySQL se almacenan en el volumen `mysql_data` y persisten entre reinicios.
